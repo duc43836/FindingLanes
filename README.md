@@ -11,7 +11,7 @@ This repository is my solution to the Finding Lanes on the Road project of the U
 ## Usage
 ---
 
-There is to ways to runthe code:
+There is to ways two runthe code:
 
 Either open the junyper notebook in the project directory
 

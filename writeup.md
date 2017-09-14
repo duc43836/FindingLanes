@@ -65,7 +65,7 @@ while success:
     else:
         writer.release()
 ```
-For the images are used to create masks, where all but the whitest and most yellow regions of the image are set to zero.
+For later filtering the images are used to create masks, where all but the whitest and most yellow regions of the image are set to zero.
 ```python
    white_threshold=np.array([175],dtype="uint8")
     yellow_threshold=np.array([50, 0, 150],dtype="uint8")
@@ -84,6 +84,13 @@ blur_gray = cv2.GaussianBlur(gray,(kernel_size, kernel_size),0)
 normalizedImg=cv2.normalize(lab[:,:,2],np.zeros_like(lab[:,:,2]), 0, 255, cv2.NORM_MINMAX)
 ```
 <img src="frame139/frame139normalized.jpg" width="200" alt="Normalized Image" /> 
+
+The blurred and normalized Imageas are now used to extract the respective edges and merged into one image.
+```python
+edges = cv2.Canny(blur_gray, low_threshold, high_threshold)
+edges=cv2.bitwise_or(cv2.Canny(normalizedImg, 30, 180),edges)
+```
+<img src="frame139/frame139white_masked_edges.jpg" width="200" alt="White Edges" /> <img src="frame139/frame139yellow_masked_edges.jpg" width="200" alt="Yellow Edges" /> <img src="frame139/frame139combined_edges.jpg" width="200" alt="Combined Edges" /> 
 
 
 ### 2. Identify potential shortcomings with your current pipeline

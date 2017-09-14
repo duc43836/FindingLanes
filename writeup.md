@@ -137,16 +137,65 @@ else:
 ```
 
 <img src="frame139/frame139yellow_left_masked_edgess.jpg" width="400" alt="Yellow Edge" /> <img src="frame139/frame139white_right_masked_edgess.jpg" width="400" alt="White Edges" />
-### 2. Identify potential shortcomings with your current pipeline
 
+**Detect and draw Lane Lines**
 
-One potential shortcoming would be what would happen when ... 
+The images are now sufficiently segmented to run the Hough line detector an them.
+```python
+    left_lines = cv2.HoughLinesP(left_masked_edges, rho, theta, threshold, np.array([]),
+                                    min_line_length, max_line_gap)
+    right_lines = cv2.HoughLinesP(right_masked_edges, rho, theta, threshold, np.array([]),
+                                    min_line_length, max_line_gap)
+```
+The results are start and end points of the detected lines. In order to get a polynomial function to inter- and extrapolate the lines we require points. Thus the X- and Y-components of the lines are extracted. The points are initially used to extract a 2nd degree poly for better approximation of curved lanes. If the rank of the poly is to low we fall back on a 1st degree poly. Finally the approximated/interpolated/extrapolated are drawn to an empty image. This process is done for each side.
+```python
+# Iterate over the output "lines" and draw lines on a blank image
+    x=[]
+    y=[]
+    if(left_lines is None):
+        print("No left_lines detected! Yellow: "+str(right_yellow))
+    else:
+        for line in left_lines:
+            for x1,y1,x2,y2 in line:
+                x.append(x1)
+                y.append(y1)
+                x.append(x2)
+                y.append(y2)
+    
+        poly=np.polyfit(y,x,2)
+        if(np.ndim(poly)<2):
+            poly=np.polyfit(y,x,1)
+            p = np.poly1d(poly)
+        y = np.arange(ysize*upppery, ysize*(lowery), 10)
+        x=p(y)
+        i=0
+        for xi in x:
+            cv2.line(line_image,(int(round(xi)),int(round(y[i]))),(int(round(x[i+1])),int(round(y[i+1]))),(255,0,0),10)
+            i=i+1
+            if i+1==len(x):
+                break
+```
 
-Another shortcoming could be ...
+The resulting lines are stacked onto the original image and returned.
+```python
+lines_edges = cv2.addWeighted(image, 0.8, line_image, 1, 0) 
+    return lines_edges;
+ ```
+ 
+<img src="frame139/frame139_processed.jpg" width="200" alt="Processed image" /> 
 
+### 2. Shortcomings 
+
+First of all the python script needs to take an argument, which sets the video path and maybe an optional argument to specify the output path/name. Having to edit the source code in order to use another file makes the code unuseable.
+
+The code is very inefficient and takes a long time to execute. It is not useable in real-time and embedded devices with lower processing power.
+
+The lane lines are displayed rater jittery and occasionally none can be calculated. In one frame in the challenge.mp4 the right lane line is even calculated incorrectly.
 
 ### 3. Suggest possible improvements to your pipeline
 
-A possible improvement would be to ...
+As mentioned, a video path argument needs to be implemented.
 
-Another potential improvement could be to ...
+In order to make the code more efficient the decision if there are yellow lines needs to be made earlier to avoid unnecessary operations.
+
+The fact that we are using a series of images that are very similar needs to be exploited. The calculated polies from the predecessing images can be used to further decrease the ROI, and use exponential smoothing to smoothe the augmentation and reject polies that are too different from the prior ones. Also the prior poly can be used if single calculations fail.

@@ -65,6 +65,8 @@ while success:
     else:
         writer.release()
 ```
+**Segmentation**
+
 For later filtering the images are used to create masks, where all but the whitest and most yellow regions of the image are set to zero.
 ```python
    white_threshold=np.array([175],dtype="uint8")
@@ -85,14 +87,56 @@ normalizedImg=cv2.normalize(lab[:,:,2],np.zeros_like(lab[:,:,2]), 0, 255, cv2.NO
 ```
 <img src="frame139/frame139normalized.jpg" width="200" alt="Normalized Image" /> 
 
-The blurred and normalized Imageas are now used to extract the respective edges and merged into one image.
+The blurred and normalized images are now used to extract the respective edges and merged into one image.
 ```python
 edges = cv2.Canny(blur_gray, low_threshold, high_threshold)
 edges=cv2.bitwise_or(cv2.Canny(normalizedImg, 30, 180),edges)
 ```
 <img src="frame139/frame139white_masked_edges.jpg" width="200" alt="White Edges" /> <img src="frame139/frame139yellow_masked_edges.jpg" width="200" alt="Yellow Edges" /> <img src="frame139/frame139combined_edges.jpg" width="200" alt="Combined Edges" /> 
 
+In order to deal with arbitrary lane types spacial filtering is applied to handle image regions where left lane lines are suspected independently from the right-hand-side counterpart. Therefore polygons are created that define the regions of interest.
 
+```python
+ysize = image.shape[0]
+xsize = image.shape[1]
+
+left_left_top=[xsize*(0.5-dx),ysize*upppery]
+left_right_top=[xsize*(0.50-gap),ysize*upppery]
+left_left_bottom=[xsize*dx,ysize*lowery]
+left_right_bottom=[xsize*(0.5-2*gap),ysize*lowery]
+
+right_left_top=[xsize*(0.5+gap),ysize*upppery]
+right_right_top=[xsize*(0.5+dx),ysize*upppery]
+right_left_bottom=[xsize*(0.5+2*gap),ysize*lowery]
+right_right_bottom=[xsize*(1-dx),ysize*lowery]
+#Create polygons from corners
+left_vertices = np.array([[left_left_top,left_right_top, left_right_bottom, left_left_bottom]], dtype=np.int32)
+right_vertices = np.array([[right_left_top,right_right_top, right_right_bottom, right_left_bottom]], dtype=np.int32)
+#Set marks as areas within the polygons
+cv2.fillPoly(left_mask, left_vertices, ignore_mask_color)
+cv2.fillPoly(right_mask, right_vertices, ignore_mask_color)
+```
+
+In the next step we check if the right or left regions contain yellow lane lines. Therefore whe the use priorly created color and region masks. Ich a threshold amount of pixels are yellow in each region, it is assumed, that the lane line on that side is yellow. The region filters are applied to the adge images accordingly.
+```python
+#check if lane lines are white or yellow
+countYellowLeft=cv2.countNonZero(cv2.bitwise_and(yellow_mask, left_mask))
+countYellowRight=cv2.countNonZero(cv2.bitwise_and(yellow_mask, right_mask))
+left_yellow=(countYellowLeft>minYellow)
+#print("Left: Yellow Count: ", countYellowLeft)
+right_yellow=(countYellowRight>minYellow)
+#print("Right Yellow Count: ", countYellowRight)
+if(left_yellow):
+    left_masked_edges = cv2.bitwise_and(yellow_edges, left_mask)
+else:
+    left_masked_edges = cv2.bitwise_and(white_edges, left_mask)
+if(right_yellow):
+    right_masked_edges = cv2.bitwise_and(yellow_edges, right_mask)
+else:
+    right_masked_edges = cv2.bitwise_and(white_edges, right_mask)
+```
+
+<img src="frame139/frame139yellow_left_masked_edgess.jpg" width="400" alt="Yellow Edge" /> <img src="frame139/frame139white_right_masked_edgess.jpg" width="400" alt="White Edges" />
 ### 2. Identify potential shortcomings with your current pipeline
 
 

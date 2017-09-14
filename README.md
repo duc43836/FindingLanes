@@ -15,7 +15,7 @@ There is to ways two runthe code:
 
 Either open the junyper notebook in the project directory
 
-`> cd {path to the project directory} >`
+`> cd {path to the project directory}`
 
 `> jupyter notebook	findingLanes.ipynb`
 

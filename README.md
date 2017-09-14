@@ -15,12 +15,13 @@ There is to ways to runthe code:
 
 Either open the junyper notebook in the project directory
 
-`> cd <path to the project directory>>`
+`> cd {path to the project directory} >`
+
 `> jupyter notebook	findingLanes.ipynb`
 
 Or open the FindingLanesInSingleVideo.py in your python IDE. The video to be processed is hard coded at the moment and can be changed in the code directly.
 
-If you want to run the proces on the challenge.mp4 you can simply execute the script.
+If you want to run the script on the challenge.mp4 you can simply execute the script.
 
 ---
 

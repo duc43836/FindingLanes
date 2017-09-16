@@ -23,7 +23,7 @@ The goals / steps of this project are the following:
 
 **I/O**
 
-Aside from the processing part other the pipeline needs to solve other problems
+Aside from the processing part the pipeline needs to solve other problems
   - Load a video
   - Extract single frames
   - Combine processed frames to new video file

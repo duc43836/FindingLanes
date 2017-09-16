@@ -39,17 +39,6 @@ success,image = vidcap.read()
 ```
 While the reader is successfully reading more images from the video stream, each extracted frame is processed and added to the output stream. 
 
-**Preprocessing**
-
-The actual work is done within the findLaneLines(image) function, which takes an image as an agument and returns the processed image.
-
-The ideal colorspace for detecting yellow and white lane lines is not BRG. This is why the original image is converted to color spaces, that work better for white and yellow lines respectively. For the white lines a gray scale image is chosen for the yellow lines it is converted to LAB color space.
-```python
-lab = cv2.cvtColor(image,cv2.COLOR_BGR2LAB)
-gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-```
-<img src="frame139/frame139.jpg" width="200" alt="Original Image" />  <img src="frame139/frame139gray.jpg" width="200" alt="Gray Image" />  <img src="frame139/frame139lab.jpg" width="200" alt="LAB Image" />
-
 
 ```python
 success = True
@@ -65,6 +54,19 @@ while success:
     else:
         writer.release()
 ```
+
+**Preprocessing**
+
+The actual work is done within the findLaneLines(image) function, which takes an image as an agument and returns the processed image.
+
+The ideal colorspace for detecting yellow and white lane lines is not BRG. This is why the original image is converted to color spaces, that work better for white and yellow lines respectively. For the white lines a gray scale image is chosen for the yellow lines it is converted to LAB color space.
+```python
+lab = cv2.cvtColor(image,cv2.COLOR_BGR2LAB)
+gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+```
+<img src="frame139/frame139.jpg" width="200" alt="Original Image" />  <img src="frame139/frame139gray.jpg" width="200" alt="Gray Image" />  <img src="frame139/frame139lab.jpg" width="200" alt="LAB Image" />
+
+
 **Segmentation**
 
 For later filtering the images are used to create masks, where all but the whitest and most yellow regions of the image are set to zero.

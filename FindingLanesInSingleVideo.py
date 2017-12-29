@@ -176,7 +176,7 @@ count = 0
 success = True
 while success:
     success,image = vidcap.read()
-    print("processing Frame "+count)
+    print("processing Frame ",count)
     count=count+1
     if (init):
         writer = cv2.VideoWriter(video.replace(".mp4","_processed.mp4"),fourcc, fps, (image.shape[1],image.shape[0]))
